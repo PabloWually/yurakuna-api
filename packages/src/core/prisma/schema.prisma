@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator pothos {
+  provider = "prisma-pothos-types"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model product {
+  id             String           @id
+  name           String
+  unity          String
+  pvp          Float
+  orderDetail    orderDetail[]
+  stock          stock?
+  isActive       Boolean
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  purchaseDetail purchaseDetail[]
+  deliveryDetail deliveryDetail[]
+  price          price?
+}
+
+model client {
+  id            String     @id
+  identificator String
+  name          String
+  phoneNumber   String
+  direction     String
+  order         order[]
+  delivery      delivery[]
+  isActive      Boolean
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model orderDetail {
+  id        String   @id
+  amount    Float
+  unitPrice Float
+  productId String
+  product   product  @relation(fields: [productId], references: [id])
+  orderId   String
+  order     order    @relation(fields: [orderId], references: [id])
+  isActive  Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model order {
+  id          String        @id
+  deliveredOn DateTime
+  total       Float
+  orderDetail orderDetail[]
+  isActive    Boolean
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  client      client        @relation(fields: [clientId], references: [id])
+  clientId    String
+}
+
+model purchaseDetail {
+  id         String   @id
+  amount     Float
+  productId  String
+  totalPrice Float
+  product    product  @relation(fields: [productId], references: [id])
+  isActive   Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  purchase   purchase @relation(fields: [purchaseId], references: [id])
+  purchaseId String
+}
+
+model deliveryDetail {
+  id         String   @id
+  amount     Float
+  unitPrice  Float
+  productId  String
+  product    product  @relation(fields: [productId], references: [id])
+  deliveryId String
+  delivery   delivery @relation(fields: [deliveryId], references: [id])
+  isActive   Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model delivery {
+  id             String           @id
+  deliveryDate   DateTime
+  total          Float
+  deliveryDetail deliveryDetail[]
+  isActive       Boolean
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  client         client           @relation(fields: [clientId], references: [id])
+  clientId       String
+}
+
+model purchase {
+  id             String           @id
+  batch          String
+  purchaseDate   DateTime
+  total          Float
+  dealer         String
+  purchaseDetail purchaseDetail[]
+  isActive       Boolean
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model stock {
+  id        String   @id
+  amount    Float
+  productId String   @unique
+  isActive  Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product product @relation(fields: [productId], references: [id])
+}
+
+model price {
+  id               String   @id
+  productPurchased Float
+  purchaseAmount    Float
+  productWaste     Float
+  mod              Float
+  transportation   Float
+  misellanious     Float
+  profit          Float
+  product          product  @relation(fields: [productId], references: [id])
+  productId        String   @unique
+  isActive         Boolean
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

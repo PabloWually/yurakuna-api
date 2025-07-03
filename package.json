@@ -1,0 +1,42 @@
+{
+  "name": "yurakuna-api",
+  "version": "0.0.1",
+  "description": "Yurakuna manage system api",
+  "main": "index.js",
+  "author": "Pablo Guallichico",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "vercel",
+    "start": "node public/index.js",
+    "build": "yarn prisma generate --schema=./src/core/prisma/schema.prisma && tsc",
+    "env": "dotenv-run-script",
+    "dev": "ts-node-dev index.ts",
+    "postinstall": "yarn prisma:generate",
+    "prisma:generate": "npx prisma generate --schema=./src/core/prisma/schema.prisma",
+    "prisma:push": "npx prisma db push --schema=./src/core/prisma/schema.prisma"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.12.8",
+    "@types/uuid": "^9.0.8",
+    "dotenv-run-script": "^0.4.1",
+    "nodemon": "^3.1.0",
+    "prisma": "^5.13.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@pothos/core": "^3.41.1",
+    "@pothos/plugin-errors": "^3.11.1",
+    "@pothos/plugin-prisma": "^3.65.1",
+    "@prisma/client": "^5.13.0",
+    "@types/uuid-validate": "^0.0.3",
+    "graphql": "16.6.0",
+    "graphql-request": "^6.1.0",
+    "graphql-scalars": "^1.23.0",
+    "graphql-yoga": "5.x.x",
+    "uuid": "^9.0.1",
+    "uuid-validate": "^0.0.3"
+  }
+}
