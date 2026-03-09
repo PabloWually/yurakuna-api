@@ -1,5 +1,6 @@
-import type { User } from "@core/user/domain/entitie/user";
+import type { User } from "@core/user/domain/entity/user";
 import type { CreateUserDTO, UpdateUserDTO } from "@core/user/domain/DTOs/userDTO";
+import type { Criteria } from "@shared/criteria";
 
 export interface IUserRepository {
   findById(id: string): Promise<User | null>;
