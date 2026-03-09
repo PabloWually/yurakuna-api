@@ -1,7 +1,13 @@
 import type { IUserRepository } from "@core/user/domain/repositories/IUserRepository";
 import { ConflictError, ValidationError } from "@shared/errors";
-import type { AuthResponse, RegisterDTO } from "@core/user/domain/DTOs/authDTO";
-import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiration, hashPassword, type TokenPayload } from "@shared/infrastructure/security/auth";
+import type { AuthResponse, RegisterDTO } from "@core/auth/domain/DTOs/authDTO";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  getRefreshTokenExpiration,
+  hashPassword,
+  type TokenPayload,
+} from "@shared/infrastructure/security/auth";
 import type { IRefreshTokenRepository } from "@core/auth/domain/repositories/IRefreshTokenRepository";
 
 export class RegisterUser {
@@ -10,14 +16,12 @@ export class RegisterUser {
     private refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
-  async register(data: RegisterDTO): Promise<AuthResponse> {
-    // Validar que el email no exista
+  register = async (data: RegisterDTO): Promise<AuthResponse> => {
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new ConflictError("El email ya está registrado");
     }
 
-    // Validar contraseña
     if (data.password.length < 8) {
       throw new ValidationError(
         "La contraseña debe tener al menos 8 caracteres",
@@ -27,7 +31,6 @@ export class RegisterUser {
     // Hash password
     const passwordHash = await hashPassword(data.password);
 
-    // Crear usuario
     const user = await this.userRepository.create({
       email: data.email,
       password: data.password,
@@ -44,7 +47,6 @@ export class RegisterUser {
 
     const accessToken = await generateAccessToken(tokenPayload);
 
-    // Crear refresh token
     const refreshTokenValue = await generateRefreshToken({
       userId: user.id,
       tokenId: crypto.randomUUID(),
@@ -64,5 +66,5 @@ export class RegisterUser {
       accessToken,
       refreshToken: refreshTokenValue,
     };
-  }
+  };
 }

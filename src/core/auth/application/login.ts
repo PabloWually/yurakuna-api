@@ -1,7 +1,7 @@
 import type { IUserRepository } from "@core/user/domain/repositories/IUserRepository";
 import type { IRefreshTokenRepository } from "@core/auth/domain/repositories/IRefreshTokenRepository";
 import { UnauthorizedError } from "@shared/errors";
-import type { AuthResponse, LoginDTO } from "@core/user/domain/DTOs/authDTO";
+import type { AuthResponse, LoginDTO } from "@core/auth/domain/DTOs/authDTO";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -16,7 +16,7 @@ export class Login {
     private refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
-  async login(data: LoginDTO): Promise<AuthResponse> {
+  logIn = async (data: LoginDTO): Promise<AuthResponse> => {
     const user = await this.userRepository.findByEmail(data.email);
     if (!user) {
       throw new UnauthorizedError("Credenciales inválidas");

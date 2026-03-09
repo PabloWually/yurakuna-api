@@ -2,7 +2,7 @@ import { pgTable, uuid, varchar, decimal, text, timestamp, pgEnum, boolean } fro
 import { products } from './products';
 
 export const stockMovementTypeEnum = pgEnum('stock_movement_type', ['in', 'out', 'adjustment', 'shrinkage']);
-export const shrinkageCauseEnum = pgEnum('shrinkage_cause', ['dañado', 'caducado']);
+export const shrinkageCauseEnum = pgEnum('shrinkage_cause', ['damaged', 'expired']);
 
 export const stockMovements = pgTable('stock_movements', {
   id: uuid('id').primaryKey().defaultRandom(),

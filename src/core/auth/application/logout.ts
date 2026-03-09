@@ -5,11 +5,11 @@ export class RefreshAccessToken {
     private refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
-  async logout(refreshToken: string): Promise<void> {
+  logOut = async (refreshToken: string): Promise<void> => {
     await this.refreshTokenRepository.deleteByToken(refreshToken);
   }
 
-  async logoutAll(userId: string): Promise<void> {
+  logOutAll = async (userId: string): Promise<void> => {
     await this.refreshTokenRepository.deleteByUserId(userId);
   }
 }

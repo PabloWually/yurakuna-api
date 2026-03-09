@@ -15,9 +15,9 @@ export class RefreshAccessToken {
     private refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
-  async refreshAccessToken(
+  refreshAccessToken = async (
     refreshToken: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> => {
     // Verificar refresh token
     const payload = await verifyRefreshToken(refreshToken);
     if (!payload) {
@@ -71,5 +71,5 @@ export class RefreshAccessToken {
       accessToken,
       refreshToken: newRefreshTokenValue,
     };
-  }
+  };
 }

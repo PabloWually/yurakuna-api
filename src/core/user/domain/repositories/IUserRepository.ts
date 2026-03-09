@@ -7,5 +7,6 @@ export interface IUserRepository {
   create(data: CreateUserDTO & { passwordHash: string }): Promise<User>;
   update(id: string, data: UpdateUserDTO): Promise<User | null>;
   delete(id: string): Promise<boolean>;
-  list(page: number, limit: number): Promise<{ users: User[]; total: number }>;
+  search(criteria: Criteria): Promise<User[]>;
+  count(criteria: Criteria): Promise<number>;
 }
