@@ -6,7 +6,7 @@ import type { CreateDeliveryDTO, UpdateDeliveryDTO } from "@core/delivery/domain
 import type { Delivery } from "@core/delivery/domain/entity/delivery";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
-export class DeliveryRepository implements IDeliveryRepository {
+export class DeliveryDrizzleRepository implements IDeliveryRepository {
   private readonly columnMap = {
     id: deliveries.id,
     orderId: deliveries.orderId,

@@ -6,7 +6,7 @@ import type { CreateOrderDTO, UpdateOrderDTO } from "@core/order/domain/DTOs/ord
 import type { Order, OrderItem, OrderWithItems } from "@core/order/domain/entity/order";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
-export class OrderRepository implements IOrderRepository {
+export class OrderDrizzleRepository implements IOrderRepository {
   private readonly columnMap = {
     id: orders.id,
     clientId: orders.clientId,

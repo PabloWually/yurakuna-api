@@ -9,7 +9,7 @@ import type {
 import { users } from "@database/schemas";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
-export class UserRepository implements IUserRepository {
+export class UserDrizzleRepository implements IUserRepository {
   private readonly columnMap = {
     id: users.id,
     email: users.email,

@@ -6,7 +6,7 @@ import type { CreateStockMovementDTO, CreateShrinkageDTO } from "@core/stock/dom
 import type { StockMovement, Shrinkage } from "@core/stock/domain/entity/stock";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
-export class StockRepository implements IStockRepository {
+export class StockDrizzleRepository implements IStockRepository {
   private readonly movementColumnMap = {
     id: stockMovements.id,
     productId: stockMovements.productId,

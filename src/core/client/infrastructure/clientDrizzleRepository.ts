@@ -10,7 +10,7 @@ import type {
 import type { Criteria } from "@core/shared/criteria";
 import { extractFilters } from "@core/shared/criteria";
 
-export class ClientRepository implements IClientRepository {
+export class ClientDrizzleRepository implements IClientRepository {
   private readonly columnMap = {
     id: clients.id,
     name: clients.name,

@@ -1,6 +1,6 @@
 import type { IRefreshTokenRepository } from "@core/auth/domain/repositories/IRefreshTokenRepository";
 
-export class RefreshAccessToken {
+export class Logout {
   constructor(
     private refreshTokenRepository: IRefreshTokenRepository,
   ) {}

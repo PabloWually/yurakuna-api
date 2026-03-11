@@ -9,7 +9,7 @@ import type {
 import type { Product } from "@core/product/domain/entity/product";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
-export class ProductRepository implements IProductRepository {
+export class ProductDrizzleRepository implements IProductRepository {
   private readonly columnMap = {
     id: products.id,
     name: products.name,
