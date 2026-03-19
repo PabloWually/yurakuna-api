@@ -32,7 +32,7 @@ export function requireRole(...roles: Role[]) {
     const user = c.get('user');
 
     if (!user) {
-      throw new UnauthorizedError('Usuario no autenticado');
+      throw new UnauthorizedError('user no autenticado');
     }
 
     if (!roles.includes(user.role)) {
@@ -46,38 +46,38 @@ export function requireRole(...roles: Role[]) {
 // Permisos específicos por recurso
 export const permissions = {
   // Productos
-  'products:read': ['administrador', 'usuario', 'cliente'],
-  'products:create': ['administrador', 'usuario'],
-  'products:update': ['administrador', 'usuario'],
-  'products:delete': ['administrador'],
+  'products:read': ['admin', 'user', 'client'],
+  'products:create': ['admin', 'user'],
+  'products:update': ['admin', 'user'],
+  'products:delete': ['admin'],
 
-  // Clientes
-  'clients:read': ['administrador', 'usuario'],
-  'clients:create': ['administrador', 'usuario'],
-  'clients:update': ['administrador', 'usuario'],
-  'clients:delete': ['administrador'],
+  // clients
+  'clients:read': ['admin', 'user'],
+  'clients:create': ['admin', 'user'],
+  'clients:update': ['admin', 'user'],
+  'clients:delete': ['admin'],
 
   // Pedidos
-  'orders:read': ['administrador', 'usuario', 'cliente'],
-  'orders:create': ['administrador', 'usuario', 'cliente'],
-  'orders:update': ['administrador', 'usuario'],
-  'orders:delete': ['administrador'],
+  'orders:read': ['admin', 'user', 'client'],
+  'orders:create': ['admin', 'user', 'client'],
+  'orders:update': ['admin', 'user'],
+  'orders:delete': ['admin'],
 
   // Stock
-  'stock:read': ['administrador', 'usuario'],
-  'stock:create': ['administrador', 'usuario'],
+  'stock:read': ['admin', 'user'],
+  'stock:create': ['admin', 'user'],
 
   // Entregas
-  'deliveries:read': ['administrador', 'usuario'],
-  'deliveries:create': ['administrador', 'usuario'],
-  'deliveries:update': ['administrador', 'usuario'],
-  'deliveries:delete': ['administrador'],
+  'deliveries:read': ['admin', 'user'],
+  'deliveries:create': ['admin', 'user'],
+  'deliveries:update': ['admin', 'user'],
+  'deliveries:delete': ['admin'],
 
-  // Usuarios
-  'users:read': ['administrador'],
-  'users:create': ['administrador'],
-  'users:update': ['administrador'],
-  'users:delete': ['administrador'],
+  // users
+  'users:read': ['admin'],
+  'users:create': ['admin'],
+  'users:update': ['admin'],
+  'users:delete': ['admin'],
 } as const;
 
 export type Permission = keyof typeof permissions;
@@ -87,7 +87,7 @@ export function requirePermission(permission: Permission) {
     const user = c.get('user');
 
     if (!user) {
-      throw new UnauthorizedError('Usuario no autenticado');
+      throw new UnauthorizedError('user no autenticado');
     }
 
     const allowedRoles = permissions[permission];

@@ -37,6 +37,9 @@
       ],
       "@database/*": [
         "src/database/*"
+      ],
+      "@api/*": [
+        "apps/api/src/*"
       ]
     }
   }

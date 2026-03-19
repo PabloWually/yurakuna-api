@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { errorHandler } from "./src/middleware/errorHandler";
+import auth from "./src/routes/auth";
+import products from "./src/routes/products";
 
 const app = new Hono();
 
@@ -20,6 +22,9 @@ app.get('/', (c) => {
     },
   });
 });
+
+app.route('/api/auth', auth);
+app.route('/api/products', products);
 
 app.notFound((c) => {
   return c.json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada' } }, 404);
