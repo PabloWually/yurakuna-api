@@ -4,6 +4,11 @@ import { logger } from "hono/logger";
 import { errorHandler } from "./src/middleware/errorHandler";
 import auth from "./src/routes/auth";
 import products from "./src/routes/products";
+import users from "./src/routes/users";
+import stock from "./src/routes/stock";
+import deliveries from "./src/routes/deliveries";
+import orders from "./src/routes/orders";
+import clients from "./src/routes/clients";
 
 const app = new Hono();
 
@@ -25,6 +30,11 @@ app.get('/', (c) => {
 
 app.route('/api/auth', auth);
 app.route('/api/products', products);
+app.route('/api/users', users);
+app.route('/api/stock', stock);
+app.route('/api/deliveries', deliveries);
+app.route('/api/orders', orders);
+app.route('/api/clients', clients);
 
 app.notFound((c) => {
   return c.json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada' } }, 404);
