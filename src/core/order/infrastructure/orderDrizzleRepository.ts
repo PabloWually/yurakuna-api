@@ -1,9 +1,17 @@
 import type { Database } from "@database/connection";
 import type { IOrderRepository } from "@core/order/domain/repositories/IOrderRepository";
 import { eq, desc, count, and } from "drizzle-orm";
-import { orders, orderItems, products } from "@database/schemas";
-import type { CreateOrderDTO, UpdateOrderDTO } from "@core/order/domain/DTOs/orderDTO";
-import type { Order, OrderItem, OrderWithItems } from "@core/order/domain/entity/order";
+import { orders, orderItems, products, clients } from "@database/schemas";
+import type {
+  CreateOrderDTO,
+  UpdateOrderDTO,
+} from "@core/order/domain/DTOs/orderDTO";
+import type {
+  Order,
+  OrderDetails,
+  OrderItem,
+  OrderWithItems,
+} from "@core/order/domain/entity/order";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
 export class OrderDrizzleRepository implements IOrderRepository {
@@ -29,16 +37,22 @@ export class OrderDrizzleRepository implements IOrderRepository {
     return result[0] || null;
   };
 
-  findByIdWithItems = async (id: string): Promise<OrderWithItems | null> => {
-    const order = await this.findById(id);
+  findByIdWithItems = async (id: string): Promise<OrderDetails | null> => {
+    const whereCondition = extractFilters([{ field: 'id', operator: 'eq', value: id }], this.columnMap);
+    const order = await this.db.query.orders.findFirst({
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
+        },
+        client: true,
+      },
+      where: whereCondition,
+    });
     if (!order) return null;
 
-    const items = await this.db
-      .select()
-      .from(orderItems)
-      .where(eq(orderItems.orderId, id));
-
-    return { ...order, items };
+    return order;
   };
 
   create = async (data: CreateOrderDTO): Promise<OrderWithItems> => {
@@ -57,9 +71,7 @@ export class OrderDrizzleRepository implements IOrderRepository {
       );
 
       const priceMap = new Map(
-        productRecords
-          .filter(Boolean)
-          .map((p) => [p!.id, p!.pricePerUnit]),
+        productRecords.filter(Boolean).map((p) => [p!.id, p!.pricePerUnit]),
       );
 
       // Calculate subtotals and total amount
@@ -129,15 +141,22 @@ export class OrderDrizzleRepository implements IOrderRepository {
     return result.length > 0;
   };
 
-  search = async (criteria: Criteria): Promise<Order[]> => {
+  search = async (criteria: Criteria): Promise<OrderDetails[]> => {
     const whereCondition = extractFilters(criteria.filters, this.columnMap);
-    return await this.db
-      .select()
-      .from(orders)
-      .where(whereCondition)
-      .orderBy(desc(orders.createdAt))
-      .limit(criteria.limit)
-      .offset(criteria.offset);
+    const response = await this.db.query.orders.findMany({
+      with: {
+        client: true,
+        items: {
+          columns: {
+            productId: true,
+          },
+        },
+      },
+      where: whereCondition,
+      limit: criteria.limit,
+      offset: criteria.offset,
+    });
+    return response;
   };
 
   count = async (criteria: Criteria): Promise<number> => {
@@ -149,7 +168,10 @@ export class OrderDrizzleRepository implements IOrderRepository {
     return totalCount[0]?.count || 0;
   };
 
-  searchByClient = async (clientId: string, criteria: Criteria): Promise<Order[]> => {
+  searchByClient = async (
+    clientId: string,
+    criteria: Criteria,
+  ): Promise<Order[]> => {
     const baseCondition = eq(orders.clientId, clientId);
     const filterCondition = extractFilters(criteria.filters, this.columnMap);
     const whereCondition = filterCondition
@@ -164,7 +186,10 @@ export class OrderDrizzleRepository implements IOrderRepository {
       .offset(criteria.offset);
   };
 
-  countByClient = async (clientId: string, criteria: Criteria): Promise<number> => {
+  countByClient = async (
+    clientId: string,
+    criteria: Criteria,
+  ): Promise<number> => {
     const baseCondition = eq(orders.clientId, clientId);
     const filterCondition = extractFilters(criteria.filters, this.columnMap);
     const whereCondition = filterCondition

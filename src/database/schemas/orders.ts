@@ -2,6 +2,7 @@ import { pgTable, uuid, varchar, decimal, timestamp, pgEnum, boolean } from 'dri
 import { clients } from './clients';
 import { users } from './users';
 import { products } from './products';
+import { relations } from 'drizzle-orm';
 
 export const orderStatusEnum = pgEnum('order_status', ['draft', 'confirmed', 'delivered', 'cancelled']);
 
@@ -26,3 +27,26 @@ export const orderItems = pgTable('order_items', {
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
+
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [orders.clientId],
+    references: [clients.id],
+  }),
+  createdBy: one(users, {
+    fields: [orders.createdById],
+    references: [users.id],
+  }),
+  items: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id],
+  }),
+  product: one(products, {
+    fields: [orderItems.productId],
+    references: [products.id],
+  }),
+}));

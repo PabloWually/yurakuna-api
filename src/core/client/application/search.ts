@@ -7,13 +7,15 @@ export class Search {
 
   search = async (
     criteria: Criteria,
-  ): Promise<{ clients: Client[]; total: number }> => {
-    const clients = await this.clientRepository.search(criteria);
+  ): Promise<{ data: Client[]; total: number, limit: number, offset: number }> => {
+    const data = await this.clientRepository.search(criteria);
     const total = await this.clientRepository.count(criteria);
 
     return {
-      clients,
+      data,
       total,
+      limit: criteria.limit,
+      offset: criteria.offset,
     };
   };
 }

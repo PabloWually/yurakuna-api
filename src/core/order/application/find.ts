@@ -1,5 +1,5 @@
 import type { IOrderRepository } from "@core/order/domain/repositories/IOrderRepository";
-import type { Order, OrderWithItems } from "@core/order/domain/entity/order";
+import type { Order, OrderDetails } from "@core/order/domain/entity/order";
 
 export class Find {
   constructor(private orderRepository: IOrderRepository) {}
@@ -12,7 +12,7 @@ export class Find {
     return order;
   };
 
-  findByIdWithItems = async (id: string): Promise<OrderWithItems | null> => {
+  findByIdWithItems = async (id: string): Promise<OrderDetails | null> => {
     const order = await this.orderRepository.findByIdWithItems(id);
     if (!order) {
       throw new Error("Order not found");

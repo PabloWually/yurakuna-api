@@ -13,7 +13,7 @@ app.get(
   requirePermission("orders:read"),
   async (c) => {
     const id = c.req.param("id");
-    const result = await orderManager.findOrder.findById(id);
+    const result = await orderManager.findOrder.findByIdWithItems(id);
     return c.json(result);
   },
 );

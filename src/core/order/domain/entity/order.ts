@@ -1,4 +1,6 @@
+import type { Client } from "@core/client/domain/entity/client";
 import type { OrderStatus } from "@shared/types";
+import { extend } from "zod/mini";
 
 export interface Order {
   id: string;
@@ -8,6 +10,12 @@ export interface Order {
   createdById: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface OrderDetails extends Order {
+  items?: OrderItem[];
+  itemsCount?: number;
+  client: Client;
 }
 
 export interface OrderItem {
