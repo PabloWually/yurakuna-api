@@ -9,6 +9,8 @@ export interface StockMovement {
   purchaseId: string | null;
   deliveryId: string | null;
   shrinkageId: string | null;
+  quantityBefore: string;
+  quantityAfter: string;
   createdAt: Date;
 }
 

@@ -19,12 +19,17 @@ export class Update {
       const deliveryWithItems = await this.deliveryRepository.findByIdWithItems(id);
       if (deliveryWithItems?.items && deliveryWithItems.items.length > 0) {
         for (const item of deliveryWithItems.items) {
+          const product = await this.productRepository.findById(item.productId);
+          const quantityBefore = Number(product?.currentStock ?? 0);
+          const quantityAfter = quantityBefore - Number(item.quantity);
           await this.stockRepository.createMovement({
             productId: item.productId,
             type: 'out',
             quantity: Number(item.quantity),
             reason: `Entrega #${id} completada`,
             deliveryId: id,
+            quantityBefore,
+            quantityAfter,
           });
           await this.productRepository.updateStock(item.productId, -Number(item.quantity));
         }

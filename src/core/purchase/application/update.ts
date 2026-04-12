@@ -19,12 +19,17 @@ export class Update {
       const purchaseWithItems = await this.purchaseRepository.findByIdWithItems(id);
       if (purchaseWithItems?.items && purchaseWithItems.items.length > 0) {
         for (const item of purchaseWithItems.items) {
+          const product = await this.productRepository.findById(item.productId);
+          const quantityBefore = Number(product?.currentStock ?? 0);
+          const quantityAfter = quantityBefore + Number(item.quantity);
           await this.stockRepository.createMovement({
             productId: item.productId,
             type: 'in',
             quantity: Number(item.quantity),
             reason: `Compra #${id} confirmada`,
             purchaseId: id,
+            quantityBefore,
+            quantityAfter,
           });
           await this.productRepository.updateStock(item.productId, Number(item.quantity));
         }

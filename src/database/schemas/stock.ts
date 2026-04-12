@@ -26,6 +26,8 @@ export const stockMovements = pgTable('stock_movements', {
   purchaseId: uuid('purchase_id').references(() => purchases.id, { onDelete: 'set null' }),
   deliveryId: uuid('delivery_id').references(() => deliveries.id, { onDelete: 'set null' }),
   shrinkageId: uuid('shrinkage_id').references(() => shrinkage.id, { onDelete: 'set null' }),
+  quantityBefore: decimal('quantity_before', { precision: 10, scale: 2 }).notNull(),
+  quantityAfter: decimal('quantity_after', { precision: 10, scale: 2 }).notNull(),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });

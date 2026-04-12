@@ -7,7 +7,10 @@ import { ProductDrizzleRepository } from "@core/product/infrastructure/productDr
 import { db } from "@database/connection";
 
 export const stockManager = {
-  cretateStockMovement: new CreateMovement(new StockDrizzleRepository(db)),
+  cretateStockMovement: new CreateMovement(
+    new StockDrizzleRepository(db),
+    new ProductDrizzleRepository(db),
+  ),
   createStockShrinkage: new CreateShrinkage(
     new StockDrizzleRepository(db),
     new ProductDrizzleRepository(db),

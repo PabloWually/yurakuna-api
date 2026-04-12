@@ -2,7 +2,7 @@ import type { Database } from "@database/connection";
 import type { IStockRepository } from "@core/stock/domain/repositories/IStockRepository";
 import { desc, count } from "drizzle-orm";
 import { stockMovements, shrinkage } from "@database/schemas";
-import type { CreateStockMovementDTO, CreateShrinkageDTO } from "@core/stock/domain/DTOs/stockDTO";
+import type { RecordStockMovementDTO, CreateShrinkageDTO } from "@core/stock/domain/DTOs/stockDTO";
 import type { StockMovement, Shrinkage } from "@core/stock/domain/entity/stock";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
@@ -16,6 +16,8 @@ export class StockDrizzleRepository implements IStockRepository {
     purchaseId: stockMovements.purchaseId,
     deliveryId: stockMovements.deliveryId,
     shrinkageId: stockMovements.shrinkageId,
+    quantityBefore: stockMovements.quantityBefore,
+    quantityAfter: stockMovements.quantityAfter,
     isActive: stockMovements.isActive,
     createdAt: stockMovements.createdAt,
   };
@@ -32,7 +34,7 @@ export class StockDrizzleRepository implements IStockRepository {
 
   constructor(private db: Database) {}
 
-  createMovement = async (data: CreateStockMovementDTO): Promise<StockMovement> => {
+  createMovement = async (data: RecordStockMovementDTO): Promise<StockMovement> => {
     const result = await this.db
       .insert(stockMovements)
       .values({
@@ -43,6 +45,8 @@ export class StockDrizzleRepository implements IStockRepository {
         purchaseId: data.purchaseId || null,
         deliveryId: data.deliveryId || null,
         shrinkageId: data.shrinkageId || null,
+        quantityBefore: data.quantityBefore.toString(),
+        quantityAfter: data.quantityAfter.toString(),
       })
       .returning();
     if (!result[0]) throw new Error("Failed to create stock movement");

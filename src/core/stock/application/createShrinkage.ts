@@ -12,12 +12,18 @@ export class CreateShrinkage {
   createShrinkage = async (data: CreateShrinkageDTO): Promise<Shrinkage> => {
     const shrinkageRecord = await this.stockRepository.createShrinkage(data);
 
+    const product = await this.productRepository.findById(data.productId);
+    const quantityBefore = Number(product?.currentStock ?? 0);
+    const quantityAfter = quantityBefore - data.quantity;
+
     await this.stockRepository.createMovement({
       productId: data.productId,
       type: 'shrinkage',
       quantity: data.quantity,
       reason: `Merma: ${data.cause}${data.notes ? ` — ${data.notes}` : ''}`,
       shrinkageId: shrinkageRecord.id,
+      quantityBefore,
+      quantityAfter,
     });
 
     await this.productRepository.updateStock(data.productId, -data.quantity);

@@ -16,6 +16,8 @@ export class Create {
         productId: product.id,
         type: "in",
         quantity: data.currentStock,
+        quantityBefore: 0,
+        quantityAfter: data.currentStock,
       });
     }
     return product;
