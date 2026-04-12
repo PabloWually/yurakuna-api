@@ -5,6 +5,8 @@ export const createStockMovementSchema = z.object({
   type: z.enum(['in', 'out', 'adjustment', 'shrinkage']),
   quantity: z.number().positive('La cantidad debe ser positiva'),
   reason: z.string().optional(),
+  purchaseId: z.string().uuid().optional(),
+  deliveryId: z.string().uuid().optional(),
 });
 
 export const createShrinkageSchema = z.object({

@@ -4,10 +4,11 @@ import { Find } from "@core/product/application/find";
 import { Search } from "@core/product/application/search";
 import { Update } from "@core/product/application/update";
 import { ProductDrizzleRepository } from "@core/product/infrastructure/productDrizzleRepository";
+import { StockDrizzleRepository } from "@core/stock/infrastructure/stockDrizzleRepository";
 import { db } from "@database/connection";
 
 export const productManager = {
-  createProduct: new Create(new ProductDrizzleRepository(db)),
+  createProduct: new Create(new ProductDrizzleRepository(db), new StockDrizzleRepository(db)),
   updateProduct: new Update(new ProductDrizzleRepository(db)),
   deleteProduct: new Delete(new ProductDrizzleRepository(db)),
   findProduct: new Find(new ProductDrizzleRepository(db)),

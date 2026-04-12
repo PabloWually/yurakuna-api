@@ -1,9 +1,9 @@
 import type { Database } from "@database/connection";
 import type { IDeliveryRepository } from "@core/delivery/domain/repositories/IDeliveryRepository";
 import { eq, desc, count } from "drizzle-orm";
-import { deliveries } from "@database/schemas";
+import { deliveries, deliveryItems } from "@database/schemas";
 import type { CreateDeliveryDTO, UpdateDeliveryDTO } from "@core/delivery/domain/DTOs/deliveryDTO";
-import type { Delivery } from "@core/delivery/domain/entity/delivery";
+import type { Delivery, DeliveryWithItems } from "@core/delivery/domain/entity/delivery";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
 export class DeliveryDrizzleRepository implements IDeliveryRepository {
@@ -31,6 +31,18 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
     return result[0] || null;
   };
 
+  findByIdWithItems = async (id: string): Promise<DeliveryWithItems | null> => {
+    const result = await this.db.query.deliveries.findFirst({
+      where: eq(deliveries.id, id),
+      with: { items: true },
+    });
+    if (!result) return null;
+    return {
+      ...result,
+      items: result.items ?? [],
+    };
+  };
+
   findByOrderId = async (orderId: string): Promise<Delivery | null> => {
     const result = await this.db
       .select()
@@ -40,18 +52,36 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
     return result[0] || null;
   };
 
-  create = async (data: CreateDeliveryDTO): Promise<Delivery> => {
-    const result = await this.db
-      .insert(deliveries)
-      .values({
-        orderId: data.orderId,
-        clientId: data.clientId,
-        deliveryAddress: data.deliveryAddress,
-        notes: data.notes || null,
-      })
-      .returning();
-    if (!result[0]) throw new Error("Failed to create delivery");
-    return result[0];
+  create = async (data: CreateDeliveryDTO): Promise<DeliveryWithItems> => {
+    return await this.db.transaction(async (tx) => {
+      const [delivery] = await tx
+        .insert(deliveries)
+        .values({
+          orderId: data.orderId,
+          clientId: data.clientId,
+          deliveryAddress: data.deliveryAddress,
+          notes: data.notes || null,
+        })
+        .returning();
+
+      if (!delivery) throw new Error("Failed to create delivery");
+
+      const insertedItems = data.items.length > 0
+        ? await tx
+            .insert(deliveryItems)
+            .values(
+              data.items.map((item) => ({
+                deliveryId: delivery.id,
+                orderItemId: item.orderItemId,
+                productId: item.productId,
+                quantity: String(item.quantity),
+              })),
+            )
+            .returning()
+        : [];
+
+      return { ...delivery, items: insertedItems };
+    });
   };
 
   update = async (id: string, data: UpdateDeliveryDTO): Promise<Delivery | null> => {

@@ -2,6 +2,8 @@ export type Role = 'admin' | 'client' | 'user';
 
 export type OrderStatus = 'draft' | 'confirmed' | 'delivered' | 'cancelled';
 
+export type PurchaseStatus = 'draft' | 'confirmed' | 'cancelled';
+
 export type ProductUnit = 'g' | 'unities' | 'lb' | 'kg' | 'liters';
 
 export type ShrinkageCause = 'damaged' | 'expired';

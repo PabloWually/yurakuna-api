@@ -9,7 +9,7 @@ export const purchaseStatusEnum = pgEnum('purchase_status', ['draft', 'confirmed
 export const purchases = pgTable('purchases', {
   id: uuid('id').primaryKey().defaultRandom(),
   providerId: uuid('provider_id').notNull().references(() => providers.id, { onDelete: 'restrict' }),
-  status: purchaseStatusEnum('status').notNull().default('draft'),
+  status: purchaseStatusEnum('status').notNull().default('confirmed'),
   totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull().default('0'),
   createdById: uuid('created_by_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
   isActive: boolean('is_active').notNull().default(true),

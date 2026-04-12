@@ -13,6 +13,9 @@ export class StockDrizzleRepository implements IStockRepository {
     type: stockMovements.type,
     quantity: stockMovements.quantity,
     reason: stockMovements.reason,
+    purchaseId: stockMovements.purchaseId,
+    deliveryId: stockMovements.deliveryId,
+    shrinkageId: stockMovements.shrinkageId,
     isActive: stockMovements.isActive,
     createdAt: stockMovements.createdAt,
   };
@@ -37,6 +40,9 @@ export class StockDrizzleRepository implements IStockRepository {
         type: data.type,
         quantity: data.quantity.toString(),
         reason: data.reason || null,
+        purchaseId: data.purchaseId || null,
+        deliveryId: data.deliveryId || null,
+        shrinkageId: data.shrinkageId || null,
       })
       .returning();
     if (!result[0]) throw new Error("Failed to create stock movement");

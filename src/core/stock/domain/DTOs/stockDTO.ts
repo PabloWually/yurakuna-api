@@ -5,6 +5,9 @@ export interface CreateStockMovementDTO {
   type: StockMovementType;
   quantity: number;
   reason?: string;
+  purchaseId?: string;
+  deliveryId?: string;
+  shrinkageId?: string;
 }
 
 export interface CreateShrinkageDTO {

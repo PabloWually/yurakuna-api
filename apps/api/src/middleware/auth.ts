@@ -78,6 +78,18 @@ export const permissions = {
   'users:create': ['admin'],
   'users:update': ['admin'],
   'users:delete': ['admin'],
+
+  // Proveedores
+  'providers:read': ['admin', 'user'],
+  'providers:create': ['admin', 'user'],
+  'providers:update': ['admin', 'user'],
+  'providers:delete': ['admin'],
+
+  // Compras
+  'purchases:read': ['admin', 'user'],
+  'purchases:create': ['admin', 'user'],
+  'purchases:update': ['admin', 'user'],
+  'purchases:delete': ['admin'],
 } as const;
 
 export type Permission = keyof typeof permissions;

@@ -6,6 +6,9 @@ export interface StockMovement {
   type: StockMovementType;
   quantity: string;
   reason: string | null;
+  purchaseId: string | null;
+  deliveryId: string | null;
+  shrinkageId: string | null;
   createdAt: Date;
 }
 

@@ -9,6 +9,8 @@ import stock from "./src/routes/stock";
 import deliveries from "./src/routes/deliveries";
 import orders from "./src/routes/orders";
 import clients from "./src/routes/clients";
+import providers from "./src/routes/providers";
+import purchases from "./src/routes/purchases";
 
 const app = new Hono();
 
@@ -35,6 +37,8 @@ app.route('/api/stock', stock);
 app.route('/api/deliveries', deliveries);
 app.route('/api/orders', orders);
 app.route('/api/clients', clients);
+app.route('/api/providers', providers);
+app.route('/api/purchases', purchases);
 
 app.notFound((c) => {
   return c.json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada' } }, 404);
