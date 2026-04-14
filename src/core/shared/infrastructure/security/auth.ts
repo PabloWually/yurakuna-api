@@ -13,7 +13,12 @@ const JWT_REFRESH_SECRET = textEncoder.encode(
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
-const PASSWORD_HASH_ITERATIONS = 210000;
+const WORKERS_MAX_PBKDF2_ITERATIONS = 100000;
+const parsedPasswordHashIterations = Number(process.env.PASSWORD_HASH_ITERATIONS ?? '100000');
+const PASSWORD_HASH_ITERATIONS =
+  Number.isInteger(parsedPasswordHashIterations) && parsedPasswordHashIterations > 0
+    ? Math.min(parsedPasswordHashIterations, WORKERS_MAX_PBKDF2_ITERATIONS)
+    : WORKERS_MAX_PBKDF2_ITERATIONS;
 const PASSWORD_HASH_LENGTH = 32;
 
 export interface TokenPayload {
@@ -159,13 +164,23 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
   const iterations = Number(iterationsValue);
 
-  if (!Number.isInteger(iterations) || iterations <= 0) {
+  if (
+    !Number.isInteger(iterations) ||
+    iterations <= 0 ||
+    iterations > WORKERS_MAX_PBKDF2_ITERATIONS
+  ) {
     return false;
   }
 
   const salt = fromBase64(saltValue);
   const expectedHash = fromBase64(hashValue);
-  const actualHash = await derivePasswordHash(password, salt, iterations);
+  let actualHash: Uint8Array;
+
+  try {
+    actualHash = await derivePasswordHash(password, salt, iterations);
+  } catch {
+    return false;
+  }
 
   return timingSafeEqual(actualHash, expectedHash);
 }
