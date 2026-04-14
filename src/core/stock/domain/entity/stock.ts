@@ -1,3 +1,4 @@
+import type { Product } from "@core/product/domain/entity/product";
 import type { StockMovementType, ShrinkageCause } from "@shared/types";
 
 export interface StockMovement {
@@ -21,4 +22,12 @@ export interface Shrinkage {
   cause: ShrinkageCause;
   notes: string | null;
   createdAt: Date;
+}
+
+export interface StockDetails extends StockMovement {
+  product?: Product;
+}
+
+export interface ShrinkageDetails extends Shrinkage {
+  product?: Product;
 }

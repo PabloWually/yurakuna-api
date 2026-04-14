@@ -29,8 +29,12 @@ export const deliveryItems = pgTable('delivery_items', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const deliveriesRelations = relations(deliveries, ({ many }) => ({
+export const deliveriesRelations = relations(deliveries, ({ many, one }) => ({
   items: many(deliveryItems),
+  client: one(clients, {
+    fields: [deliveries.clientId],
+    references: [clients.id],
+  }),
 }));
 
 export const deliveryItemsRelations = relations(deliveryItems, ({ one }) => ({

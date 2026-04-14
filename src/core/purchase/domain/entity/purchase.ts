@@ -28,7 +28,7 @@ export interface PurchaseWithItems extends Purchase {
 }
 
 export interface PurchaseDetails extends Purchase {
-  provider: Provider;
+  provider?: Provider;
   items?: PurchaseItem[];
   itemsCount?: number;
 }

@@ -3,7 +3,7 @@ import type { IDeliveryRepository } from "@core/delivery/domain/repositories/IDe
 import { eq, desc, count } from "drizzle-orm";
 import { deliveries, deliveryItems } from "@database/schemas";
 import type { CreateDeliveryDTO, UpdateDeliveryDTO } from "@core/delivery/domain/DTOs/deliveryDTO";
-import type { Delivery, DeliveryWithItems } from "@core/delivery/domain/entity/delivery";
+import type { Delivery, DeliveryDetails, DeliveryWithItems } from "@core/delivery/domain/entity/delivery";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
 export class DeliveryDrizzleRepository implements IDeliveryRepository {
@@ -105,15 +105,14 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
     return result.length > 0;
   };
 
-  search = async (criteria: Criteria): Promise<Delivery[]> => {
+  search = async (criteria: Criteria): Promise<DeliveryDetails[]> => {
     const whereCondition = extractFilters(criteria.filters, this.columnMap);
-    return await this.db
-      .select()
-      .from(deliveries)
-      .where(whereCondition)
-      .orderBy(desc(deliveries.createdAt))
-      .limit(criteria.limit)
-      .offset(criteria.offset);
+    return await this.db.query.deliveries.findMany({
+      with: { client: true },
+      where: whereCondition,
+      limit: criteria.limit,
+      offset: criteria.offset,
+    });
   };
 
   count = async (criteria: Criteria): Promise<number> => {

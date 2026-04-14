@@ -1,15 +1,23 @@
-import type { Database } from '@database/connection';
-import type { IPurchaseRepository } from '@core/purchase/domain/repositories/IPurchaseRepository';
-import { eq, count, and } from 'drizzle-orm';
-import { purchases, purchaseItems, products, providers } from '@database/schemas';
-import type { CreatePurchaseDTO, UpdatePurchaseDTO } from '@core/purchase/domain/DTOs/purchaseDTO';
+import type { Database } from "@database/connection";
+import type { IPurchaseRepository } from "@core/purchase/domain/repositories/IPurchaseRepository";
+import { eq, count, and } from "drizzle-orm";
+import {
+  purchases,
+  purchaseItems,
+  products,
+  providers,
+} from "@database/schemas";
+import type {
+  CreatePurchaseDTO,
+  UpdatePurchaseDTO,
+} from "@core/purchase/domain/DTOs/purchaseDTO";
 import type {
   Purchase,
   PurchaseDetails,
   PurchaseItem,
   PurchaseWithItems,
-} from '@core/purchase/domain/entity/purchase';
-import { extractFilters, type Criteria } from '@shared/criteria';
+} from "@core/purchase/domain/entity/purchase";
+import { extractFilters, type Criteria } from "@shared/criteria";
 
 export class PurchaseDrizzleRepository implements IPurchaseRepository {
   private readonly columnMap = {
@@ -36,13 +44,17 @@ export class PurchaseDrizzleRepository implements IPurchaseRepository {
 
   findByIdWithItems = async (id: string): Promise<PurchaseDetails | null> => {
     const whereCondition = extractFilters(
-      [{ field: 'id', operator: 'eq', value: id }],
+      [{ field: "id", operator: "eq", value: id }],
       this.columnMap,
     );
     const purchase = await this.db.query.purchases.findFirst({
       with: {
+        items: {
+          with: {
+            product: true,
+          },
+        },
         provider: true,
-        items: true,
       },
       where: whereCondition,
     });
@@ -74,7 +86,7 @@ export class PurchaseDrizzleRepository implements IPurchaseRepository {
         })
         .returning();
 
-      if (!newPurchase) throw new Error('Failed to create purchase');
+      if (!newPurchase) throw new Error("Failed to create purchase");
 
       // Insert purchase items
       const insertedItems: PurchaseItem[] = [];
@@ -98,7 +110,10 @@ export class PurchaseDrizzleRepository implements IPurchaseRepository {
     });
   };
 
-  update = async (id: string, data: UpdatePurchaseDTO): Promise<Purchase | null> => {
+  update = async (
+    id: string,
+    data: UpdatePurchaseDTO,
+  ): Promise<Purchase | null> => {
     const updateData: any = { updatedAt: new Date() };
     if (data.status !== undefined) updateData.status = data.status;
 

@@ -3,7 +3,7 @@ import type { IStockRepository } from "@core/stock/domain/repositories/IStockRep
 import { desc, count } from "drizzle-orm";
 import { stockMovements, shrinkage } from "@database/schemas";
 import type { RecordStockMovementDTO, CreateShrinkageDTO } from "@core/stock/domain/DTOs/stockDTO";
-import type { StockMovement, Shrinkage } from "@core/stock/domain/entity/stock";
+import type { StockMovement, Shrinkage, ShrinkageDetails, StockDetails } from "@core/stock/domain/entity/stock";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
 export class StockDrizzleRepository implements IStockRepository {
@@ -67,15 +67,14 @@ export class StockDrizzleRepository implements IStockRepository {
     return result[0];
   };
 
-  searchMovements = async (criteria: Criteria): Promise<StockMovement[]> => {
+  searchMovements = async (criteria: Criteria): Promise<StockDetails[]> => {
     const whereCondition = extractFilters(criteria.filters, this.movementColumnMap);
-    return await this.db
-      .select()
-      .from(stockMovements)
-      .where(whereCondition)
-      .orderBy(desc(stockMovements.createdAt))
-      .limit(criteria.limit)
-      .offset(criteria.offset);
+    return await this.db.query.stockMovements.findMany({
+      with: { product: true },
+      where: whereCondition,
+      limit: criteria.limit,
+      offset: criteria.offset,
+    });
   };
 
   countMovements = async (criteria: Criteria): Promise<number> => {
@@ -87,15 +86,14 @@ export class StockDrizzleRepository implements IStockRepository {
     return totalCount[0]?.count || 0;
   };
 
-  searchShrinkage = async (criteria: Criteria): Promise<Shrinkage[]> => {
+  searchShrinkage = async (criteria: Criteria): Promise<ShrinkageDetails[]> => {
     const whereCondition = extractFilters(criteria.filters, this.shrinkageColumnMap);
-    return await this.db
-      .select()
-      .from(shrinkage)
-      .where(whereCondition)
-      .orderBy(desc(shrinkage.createdAt))
-      .limit(criteria.limit)
-      .offset(criteria.offset);
+    return await this.db.query.shrinkage.findMany({
+      with: { product: true },
+      where: whereCondition,
+      limit: criteria.limit,
+      offset: criteria.offset,
+    });
   };
 
   countShrinkage = async (criteria: Criteria): Promise<number> => {

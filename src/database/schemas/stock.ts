@@ -50,3 +50,10 @@ export const stockMovementsRelations = relations(stockMovements, ({ one }) => ({
     references: [shrinkage.id],
   }),
 }));
+
+export const shrinkageRelations = relations(shrinkage, ({ one }) => ({
+  product: one(products, {
+    fields: [shrinkage.productId],
+    references: [products.id],
+  }),
+}));

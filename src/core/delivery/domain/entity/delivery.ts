@@ -1,3 +1,4 @@
+import type { Client } from "@core/client/domain/entity/client";
 import type { DeliveryStatus } from "@shared/types";
 
 export interface Delivery {
@@ -10,6 +11,12 @@ export interface Delivery {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface DeliveryDetails extends Delivery {
+  client?: Client;
+  items?: DeliveryItem[];
+  itemsCount?: number;
 }
 
 export interface DeliveryItem {
