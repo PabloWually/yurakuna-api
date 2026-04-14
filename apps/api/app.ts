@@ -44,11 +44,4 @@ app.notFound((c) => {
   return c.json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada' } }, 404);
 });
 
-const port = process.env.PORT || 3000;
-
-console.log(`Server running on http://localhost:${port}`);
-
-export default {
-  port,
-  fetch: app.fetch,
-};
+export default app;

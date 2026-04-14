@@ -1,0 +1,22 @@
+name = "yurakuna-api"
+main = "index.ts"
+compatibility_date = "2025-09-15"
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
+
+[vars]
+# Variables de entorno públicas (sin datos sensibles)
+JWT_EXPIRES_IN = "15m"
+JWT_REFRESH_EXPIRES_IN = "7d"
+
+# Secrets - configurar con: wrangler secret put <NAME>
+# DATABASE_URL
+# JWT_SECRET
+# JWT_REFRESH_SECRET
+
+# Para desarrollo local
+[env.development]
+name = "yurakuna-api-dev"
+
+# Para producción
+[env.production]
+name = "yurakuna-api-prod"

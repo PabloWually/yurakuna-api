@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "bun run --hot ./apps/api/app.ts",
     "debug": "bun run --inspect-wait --hot ./apps/api/app.ts",
+    "deploy": "bunx wrangler deploy --env production",
+    "deploy:production": "bunx wrangler deploy --env production",
     "db:generate": "drizzle-kit generate --config src/database/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config src/database/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config src/database/drizzle.config.ts"

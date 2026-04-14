@@ -1,16 +1,20 @@
 import type { Role } from '@shared/types';
 import { SignJWT, jwtVerify } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(
+const textEncoder = new TextEncoder();
+
+const JWT_SECRET = textEncoder.encode(
   process.env.JWT_SECRET || 'default-secret-key-change-in-production'
 );
 
-const JWT_REFRESH_SECRET = new TextEncoder().encode(
+const JWT_REFRESH_SECRET = textEncoder.encode(
   process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-key-change-in-production'
 );
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+const PASSWORD_HASH_ITERATIONS = 210000;
+const PASSWORD_HASH_LENGTH = 32;
 
 export interface TokenPayload {
   userId: string;
@@ -39,6 +43,66 @@ function parseTimeToSeconds(time: string): number {
     default:
       return 900; // default 15 minutes
   }
+}
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = '';
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
+}
+
+function fromBase64(value: string): Uint8Array {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
+}
+
+async function derivePasswordHash(password: string, salt: Uint8Array, iterations: number) {
+  const saltBuffer = salt.buffer as ArrayBuffer;
+
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    textEncoder.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      hash: 'SHA-256',
+      salt: saltBuffer,
+      iterations,
+    },
+    keyMaterial,
+    PASSWORD_HASH_LENGTH * 8
+  );
+
+  return new Uint8Array(derivedBits);
+}
+
+function timingSafeEqual(left: Uint8Array, right: Uint8Array): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  let result = 0;
+
+  for (let index = 0; index < left.length; index += 1) {
+    result |= left[index]! ^ right[index]!;
+  }
+
+  return result === 0;
 }
 
 export async function generateAccessToken(payload: TokenPayload): Promise<string> {
@@ -80,11 +144,30 @@ export async function verifyRefreshToken(token: string): Promise<RefreshTokenPay
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return await Bun.password.hash(password);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await derivePasswordHash(password, salt, PASSWORD_HASH_ITERATIONS);
+
+  return ['pbkdf2', PASSWORD_HASH_ITERATIONS, toBase64(salt), toBase64(hash)].join('$');
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return await Bun.password.verify(password, hash);
+  const [algorithm, iterationsValue, saltValue, hashValue] = hash.split('$');
+
+  if (algorithm !== 'pbkdf2' || !iterationsValue || !saltValue || !hashValue) {
+    return false;
+  }
+
+  const iterations = Number(iterationsValue);
+
+  if (!Number.isInteger(iterations) || iterations <= 0) {
+    return false;
+  }
+
+  const salt = fromBase64(saltValue);
+  const expectedHash = fromBase64(hashValue);
+  const actualHash = await derivePasswordHash(password, salt, iterations);
+
+  return timingSafeEqual(actualHash, expectedHash);
 }
 
 export function getRefreshTokenExpiration(): Date {
