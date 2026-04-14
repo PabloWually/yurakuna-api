@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { ensureDatabaseReady } from "@database/connection";
 import { errorHandler } from "./src/middleware/errorHandler";
 import auth from "./src/routes/auth";
 import products from "./src/routes/products";
@@ -17,6 +18,25 @@ const app = new Hono();
 app.use('*', logger());
 app.use('*', cors());
 app.use('*', errorHandler);
+app.use('/api/*', async (c, next) => {
+  try {
+    await ensureDatabaseReady();
+  } catch (error) {
+    console.error('Database warm-up failed:', error);
+
+    return c.json(
+      {
+        error: {
+          code: 'DATABASE_UNAVAILABLE',
+          message: 'Servicio temporalmente no disponible. Intenta nuevamente en unos segundos.',
+        },
+      },
+      503
+    );
+  }
+
+  await next();
+});
 
 app.get('/', (c) => {
   return c.json({
