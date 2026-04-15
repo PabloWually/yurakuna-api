@@ -13,23 +13,13 @@ import providers from "./src/routes/providers";
 import purchases from "./src/routes/purchases";
 
 const app = new Hono();
-const defaultAllowedOrigin = "http://localhost:3000";
-const allowedOrigins = (process.env.CORS_ORIGINS ?? defaultAllowedOrigin)
-  .split(",")
-  .map((origin: string) => origin.trim())
-  .filter((origin: string) => origin.length > 0);
+const allowedOrigins = process.env.CORS_ORIGINS.split(",")
 
 app.use('*', logger());
 app.use(
   '*',
   cors({
-    origin: (origin) => {
-      if (!origin) {
-        return allowedOrigins[0] ?? defaultAllowedOrigin;
-      }
-
-      return allowedOrigins.includes(origin) ? origin : allowedOrigins[0] ?? defaultAllowedOrigin;
-    },
+    origin: allowedOrigins,
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Content-Length', 'Content-Type'],
