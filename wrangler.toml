@@ -21,3 +21,7 @@ name = "yurakuna-api-dev"
 # Para producción
 [env.production]
 name = "yurakuna-api-prod"
+
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "80b2b70e0ab14f63a0bdebe726f66bed"
