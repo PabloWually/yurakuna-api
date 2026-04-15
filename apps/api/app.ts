@@ -13,7 +13,8 @@ import providers from "./src/routes/providers";
 import purchases from "./src/routes/purchases";
 
 const app = new Hono();
-const allowedOrigins = process.env.CORS_ORIGINS.split(",")
+const defaultAllowedOrigin = "http://localhost:4200";
+const allowedOrigins = (process.env.CORS_ORIGINS ?? defaultAllowedOrigin).split(",")
 
 app.use('*', logger());
 app.use(

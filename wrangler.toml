@@ -7,6 +7,7 @@ compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
 # Variables de entorno públicas (sin datos sensibles)
 JWT_EXPIRES_IN = "15m"
 JWT_REFRESH_EXPIRES_IN = "7d"
+CORS_ORIGINS = "https://yurakuna-front.pablo-guallichico.workers.dev,https://yurakuna.frubest.com,http://localhost:4200"
 
 # Secrets - configurar con: wrangler secret put <NAME>
 # DATABASE_URL
