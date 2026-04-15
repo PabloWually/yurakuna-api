@@ -5,12 +5,27 @@ import { Search } from "@core/product/application/search";
 import { Update } from "@core/product/application/update";
 import { ProductDrizzleRepository } from "@core/product/infrastructure/productDrizzleRepository";
 import { StockDrizzleRepository } from "@core/stock/infrastructure/stockDrizzleRepository";
-import { db } from "@database/connection";
+import { getDatabase } from "@database/connection";
 
 export const productManager = {
-  createProduct: new Create(new ProductDrizzleRepository(db), new StockDrizzleRepository(db)),
-  updateProduct: new Update(new ProductDrizzleRepository(db)),
-  deleteProduct: new Delete(new ProductDrizzleRepository(db)),
-  findProduct: new Find(new ProductDrizzleRepository(db)),
-  searchProduct: new Search(new ProductDrizzleRepository(db)),
+  get createProduct() {
+    const db = getDatabase();
+    return new Create(new ProductDrizzleRepository(db), new StockDrizzleRepository(db));
+  },
+  get updateProduct() {
+    const db = getDatabase();
+    return new Update(new ProductDrizzleRepository(db));
+  },
+  get deleteProduct() {
+    const db = getDatabase();
+    return new Delete(new ProductDrizzleRepository(db));
+  },
+  get findProduct() {
+    const db = getDatabase();
+    return new Find(new ProductDrizzleRepository(db));
+  },
+  get searchProduct() {
+    const db = getDatabase();
+    return new Search(new ProductDrizzleRepository(db));
+  },
 }

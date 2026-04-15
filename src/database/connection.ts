@@ -2,13 +2,41 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schemas';
 
-const connectionString = process.env.HYPERDRIVE.connectionString
+type HyperdriveEnv = {
+  HYPERDRIVE?: {
+    connectionString?: string | null;
+  };
+};
 
-if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is not set');
+function createDatabase(connectionString: string) {
+  const client = postgres(connectionString);
+  return drizzle(client, { schema });
 }
 
-export const client = postgres(connectionString);
-export const db = drizzle(client, { schema });
+export type Database = ReturnType<typeof createDatabase>;
 
-export type Database = typeof db;
+let database: Database | undefined;
+let activeConnectionString: string | undefined;
+
+export function initializeDatabase(env: HyperdriveEnv): Database {
+  const connectionString = env.HYPERDRIVE?.connectionString;
+
+  if (!connectionString) {
+    throw new Error('HYPERDRIVE connection string is not set');
+  }
+
+  if (!database || activeConnectionString !== connectionString) {
+    database = createDatabase(connectionString);
+    activeConnectionString = connectionString;
+  }
+
+  return database;
+}
+
+export function getDatabase(): Database {
+  if (!database) {
+    throw new Error('Database has not been initialized');
+  }
+
+  return database;
+}

@@ -6,16 +6,31 @@ import { Update } from '@core/purchase/application/update';
 import { PurchaseDrizzleRepository } from '@core/purchase/infrastructure/purchaseDrizzleRepository';
 import { StockDrizzleRepository } from '@core/stock/infrastructure/stockDrizzleRepository';
 import { ProductDrizzleRepository } from '@core/product/infrastructure/productDrizzleRepository';
-import { db } from '@database/connection';
+import { getDatabase } from '@database/connection';
 
 export const purchaseManager = {
-  createPurchase: new Create(new PurchaseDrizzleRepository(db)),
-  updatePurchase: new Update(
-    new PurchaseDrizzleRepository(db),
-    new StockDrizzleRepository(db),
-    new ProductDrizzleRepository(db),
-  ),
-  deletePurchase: new Delete(new PurchaseDrizzleRepository(db)),
-  findPurchase: new Find(new PurchaseDrizzleRepository(db)),
-  searchPurchase: new Search(new PurchaseDrizzleRepository(db)),
+  get createPurchase() {
+    const db = getDatabase();
+    return new Create(new PurchaseDrizzleRepository(db));
+  },
+  get updatePurchase() {
+    const db = getDatabase();
+    return new Update(
+      new PurchaseDrizzleRepository(db),
+      new StockDrizzleRepository(db),
+      new ProductDrizzleRepository(db),
+    );
+  },
+  get deletePurchase() {
+    const db = getDatabase();
+    return new Delete(new PurchaseDrizzleRepository(db));
+  },
+  get findPurchase() {
+    const db = getDatabase();
+    return new Find(new PurchaseDrizzleRepository(db));
+  },
+  get searchPurchase() {
+    const db = getDatabase();
+    return new Search(new PurchaseDrizzleRepository(db));
+  },
 };

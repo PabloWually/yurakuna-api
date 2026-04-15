@@ -4,17 +4,29 @@ import { ListMovements } from "@core/stock/application/listMovements";
 import { ListShrinkage } from "@core/stock/application/listShrinkage";
 import { StockDrizzleRepository } from "@core/stock/infrastructure/stockDrizzleRepository";
 import { ProductDrizzleRepository } from "@core/product/infrastructure/productDrizzleRepository";
-import { db } from "@database/connection";
+import { getDatabase } from "@database/connection";
 
 export const stockManager = {
-  cretateStockMovement: new CreateMovement(
-    new StockDrizzleRepository(db),
-    new ProductDrizzleRepository(db),
-  ),
-  createStockShrinkage: new CreateShrinkage(
-    new StockDrizzleRepository(db),
-    new ProductDrizzleRepository(db),
-  ),
-  listStockMovements: new ListMovements(new StockDrizzleRepository(db)),
-  listStockShrinkage: new ListShrinkage(new StockDrizzleRepository(db)),
+  get cretateStockMovement() {
+    const db = getDatabase();
+    return new CreateMovement(
+      new StockDrizzleRepository(db),
+      new ProductDrizzleRepository(db),
+    );
+  },
+  get createStockShrinkage() {
+    const db = getDatabase();
+    return new CreateShrinkage(
+      new StockDrizzleRepository(db),
+      new ProductDrizzleRepository(db),
+    );
+  },
+  get listStockMovements() {
+    const db = getDatabase();
+    return new ListMovements(new StockDrizzleRepository(db));
+  },
+  get listStockShrinkage() {
+    const db = getDatabase();
+    return new ListShrinkage(new StockDrizzleRepository(db));
+  },
 };

@@ -11,6 +11,7 @@ import orders from "./src/routes/orders";
 import clients from "./src/routes/clients";
 import providers from "./src/routes/providers";
 import purchases from "./src/routes/purchases";
+import { initializeDatabase } from "@database/connection";
 
 const app = new Hono();
 const defaultAllowedOrigin = "http://localhost:4200";
@@ -28,6 +29,11 @@ app.use(
   })
 );
 app.use('*', errorHandler);
+
+app.use('*', async (c, next) => {
+  initializeDatabase(c.env as { HYPERDRIVE?: { connectionString?: string | null } });
+  await next();
+});
 
 app.get('/', (c) => {
   return c.json({

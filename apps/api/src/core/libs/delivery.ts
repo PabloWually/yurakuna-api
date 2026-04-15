@@ -6,16 +6,31 @@ import { Update } from '@core/delivery/application/update';
 import { DeliveryDrizzleRepository } from '@core/delivery/infrastructure/deliveryDrizzleRepository';
 import { StockDrizzleRepository } from '@core/stock/infrastructure/stockDrizzleRepository';
 import { ProductDrizzleRepository } from '@core/product/infrastructure/productDrizzleRepository';
-import { db } from '@database/connection';
+import { getDatabase } from '@database/connection';
 
 export const deliveryManager = {
-  createDelivery: new Create(new DeliveryDrizzleRepository(db)),
-  updateDelivery: new Update(
-    new DeliveryDrizzleRepository(db),
-    new StockDrizzleRepository(db),
-    new ProductDrizzleRepository(db),
-  ),
-  deleteDelivery: new Delete(new DeliveryDrizzleRepository(db)),
-  findDelivery: new Find(new DeliveryDrizzleRepository(db)),
-  searchDelivery: new Search(new DeliveryDrizzleRepository(db)),
+  get createDelivery() {
+    const db = getDatabase();
+    return new Create(new DeliveryDrizzleRepository(db));
+  },
+  get updateDelivery() {
+    const db = getDatabase();
+    return new Update(
+      new DeliveryDrizzleRepository(db),
+      new StockDrizzleRepository(db),
+      new ProductDrizzleRepository(db),
+    );
+  },
+  get deleteDelivery() {
+    const db = getDatabase();
+    return new Delete(new DeliveryDrizzleRepository(db));
+  },
+  get findDelivery() {
+    const db = getDatabase();
+    return new Find(new DeliveryDrizzleRepository(db));
+  },
+  get searchDelivery() {
+    const db = getDatabase();
+    return new Search(new DeliveryDrizzleRepository(db));
+  },
 };
