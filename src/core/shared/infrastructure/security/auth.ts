@@ -83,8 +83,26 @@ export async function hashPassword(password: string): Promise<string> {
   return await Bun.password.hash(password);
 }
 
+function normalizePasswordHash(hash: string): string {
+  // Some legacy bcrypt hashes are stored with the $2y$ prefix.
+  // Bun supports $2b$, and both formats are compatible for verification.
+  if (hash.startsWith('$2y$')) {
+    return `$2b$${hash.slice(4)}`;
+  }
+
+  return hash;
+}
+
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return await Bun.password.verify(password, hash);
+  const normalizedHash = normalizePasswordHash(hash);
+
+  try {
+    return await Bun.password.verify(password, normalizedHash);
+  } catch (error) {
+    // If the hash algorithm is unknown/unsupported, treat it as invalid credentials
+    // instead of throwing and turning login into a 500 response.
+    return false;
+  }
 }
 
 export function getRefreshTokenExpiration(): Date {
