@@ -4,7 +4,7 @@ import type { Criteria } from "@shared/criteria";
 
 export interface IDeliveryRepository {
   findById(id: string): Promise<Delivery | null>;
-  findByIdWithItems(id: string): Promise<DeliveryWithItems | null>;
+  findByIdWithItems(id: string): Promise<DeliveryDetails | null>;
   findByOrderId(orderId: string): Promise<Delivery | null>;
   create(data: CreateDeliveryDTO): Promise<DeliveryWithItems>;
   update(id: string, data: UpdateDeliveryDTO): Promise<Delivery | null>;

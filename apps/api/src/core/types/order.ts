@@ -1,6 +1,6 @@
 import z from "zod";
 
-const createOrderItemSchema = z.object({
+export const createOrderItemSchema = z.object({
   productId: z.string().min(1, 'ID de producto requerido'),
   quantity: z.number().positive('La cantidad debe ser positiva'),
 });
@@ -13,4 +13,8 @@ export const createOrderSchema = z.object({
 
 export const updateOrderSchema = z.object({
   status: z.enum(['draft', 'confirmed', 'delivered', 'cancelled']).optional(),
+});
+
+export const updateOrderItemSchema = z.object({
+  quantity: z.number().positive('La cantidad debe ser positiva'),
 });

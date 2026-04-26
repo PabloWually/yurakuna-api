@@ -19,3 +19,7 @@ export const updateDeliverySchema = z.object({
   deliveredAt: z.coerce.date().optional(),
   notes: z.string().optional(),
 });
+
+export const updateDeliveryItemSchema = z.object({
+  quantity: z.number().positive('La cantidad debe ser mayor a 0'),
+});

@@ -159,4 +159,55 @@ export class PurchaseDrizzleRepository implements IPurchaseRepository {
       .where(whereCondition);
     return totalCount[0]?.count || 0;
   };
+
+  // Methods for managing purchase items
+  updatePurchaseItem = async (
+    itemId: string,
+    quantity: string,
+    pricePerUnit: string,
+  ): Promise<PurchaseItem | null> => {
+    const subtotal = (Number(pricePerUnit) * Number(quantity)).toString();
+
+    const result = await this.db
+      .update(purchaseItems)
+      .set({
+        quantity,
+        pricePerUnit,
+        subtotal,
+      })
+      .where(eq(purchaseItems.id, itemId))
+      .returning();
+
+    return result[0] || null;
+  };
+
+  deletePurchaseItem = async (itemId: string): Promise<boolean> => {
+    const result = await this.db
+      .delete(purchaseItems)
+      .where(eq(purchaseItems.id, itemId))
+      .returning();
+    return result.length > 0;
+  };
+
+  addPurchaseItem = async (
+    purchaseId: string,
+    productId: string,
+    quantity: string,
+    pricePerUnit: string,
+  ): Promise<PurchaseItem | null> => {
+    const subtotal = (Number(pricePerUnit) * Number(quantity)).toString();
+
+    const result = await this.db
+      .insert(purchaseItems)
+      .values({
+        purchaseId,
+        productId,
+        quantity,
+        pricePerUnit,
+        subtotal,
+      })
+      .returning();
+
+    return result[0] || null;
+  };
 }

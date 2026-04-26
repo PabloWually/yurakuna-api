@@ -2,8 +2,16 @@ import type { Database } from "@database/connection";
 import type { IDeliveryRepository } from "@core/delivery/domain/repositories/IDeliveryRepository";
 import { eq, desc, count } from "drizzle-orm";
 import { deliveries, deliveryItems } from "@database/schemas";
-import type { CreateDeliveryDTO, UpdateDeliveryDTO } from "@core/delivery/domain/DTOs/deliveryDTO";
-import type { Delivery, DeliveryDetails, DeliveryWithItems } from "@core/delivery/domain/entity/delivery";
+import type {
+  CreateDeliveryDTO,
+  UpdateDeliveryDTO,
+} from "@core/delivery/domain/DTOs/deliveryDTO";
+import type {
+  Delivery,
+  DeliveryDetails,
+  DeliveryWithItems,
+  DeliveryItem,
+} from "@core/delivery/domain/entity/delivery";
 import { extractFilters, type Criteria } from "@shared/criteria";
 
 export class DeliveryDrizzleRepository implements IDeliveryRepository {
@@ -31,10 +39,16 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
     return result[0] || null;
   };
 
-  findByIdWithItems = async (id: string): Promise<DeliveryWithItems | null> => {
+  findByIdWithItems = async (id: string): Promise<DeliveryDetails | null> => {
     const result = await this.db.query.deliveries.findFirst({
       where: eq(deliveries.id, id),
-      with: { items: true },
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
+        },
+      },
     });
     if (!result) return null;
     return {
@@ -66,28 +80,33 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
 
       if (!delivery) throw new Error("Failed to create delivery");
 
-      const insertedItems = data.items.length > 0
-        ? await tx
-            .insert(deliveryItems)
-            .values(
-              data.items.map((item) => ({
-                deliveryId: delivery.id,
-                orderItemId: item.orderItemId,
-                productId: item.productId,
-                quantity: String(item.quantity),
-              })),
-            )
-            .returning()
-        : [];
+      const insertedItems =
+        data.items.length > 0
+          ? await tx
+              .insert(deliveryItems)
+              .values(
+                data.items.map((item) => ({
+                  deliveryId: delivery.id,
+                  orderItemId: item.orderItemId,
+                  productId: item.productId,
+                  quantity: String(item.quantity),
+                })),
+              )
+              .returning()
+          : [];
 
       return { ...delivery, items: insertedItems };
     });
   };
 
-  update = async (id: string, data: UpdateDeliveryDTO): Promise<Delivery | null> => {
+  update = async (
+    id: string,
+    data: UpdateDeliveryDTO,
+  ): Promise<Delivery | null> => {
     const updateData: any = { updatedAt: new Date() };
     if (data.status !== undefined) updateData.status = data.status;
-    if (data.deliveredAt !== undefined) updateData.deliveredAt = data.deliveredAt;
+    if (data.deliveredAt !== undefined)
+      updateData.deliveredAt = data.deliveredAt;
     if (data.notes !== undefined) updateData.notes = data.notes;
     const result = await this.db
       .update(deliveries)
@@ -122,5 +141,48 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
       .from(deliveries)
       .where(whereCondition);
     return totalCount[0]?.count || 0;
+  };
+
+  // Methods for managing delivery items
+  updateDeliveryItem = async (
+    itemId: string,
+    quantity: string,
+  ): Promise<DeliveryItem | null> => {
+    const result = await this.db
+      .update(deliveryItems)
+      .set({
+        quantity,
+      })
+      .where(eq(deliveryItems.id, itemId))
+      .returning();
+
+    return result[0] || null;
+  };
+
+  deleteDeliveryItem = async (itemId: string): Promise<boolean> => {
+    const result = await this.db
+      .delete(deliveryItems)
+      .where(eq(deliveryItems.id, itemId))
+      .returning();
+    return result.length > 0;
+  };
+
+  addDeliveryItem = async (
+    deliveryId: string,
+    orderItemId: string,
+    productId: string,
+    quantity: string,
+  ): Promise<DeliveryItem | null> => {
+    const result = await this.db
+      .insert(deliveryItems)
+      .values({
+        deliveryId,
+        orderItemId,
+        productId,
+        quantity,
+      })
+      .returning();
+
+    return result[0] || null;
   };
 }

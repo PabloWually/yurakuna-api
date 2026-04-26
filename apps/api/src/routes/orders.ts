@@ -1,5 +1,5 @@
 import { orderManager } from "@api/core/libs/order";
-import { createOrderSchema, updateOrderSchema } from "@api/core/types/order";
+import { createOrderSchema, updateOrderSchema, updateOrderItemSchema, createOrderItemSchema } from "@api/core/types/order";
 import { Criteria } from "@api/core/types/shared";
 import { authMiddleware, requirePermission } from "@api/middleware/auth";
 import { zValidator } from "@hono/zod-validator";
@@ -60,5 +60,45 @@ app.delete("/:id", authMiddleware, requirePermission("orders:delete"), async (c)
   await orderManager.deleteOrder.delete(id);
   return c.json({ message: "Orden eliminada exitosamente" });
 });
+
+// Item management endpoints
+app.post(
+  "/:id/items",
+  authMiddleware,
+  requirePermission("orders:update"),
+  zValidator("json", createOrderItemSchema),
+  async (c) => {
+    const orderId = c.req.param("id");
+    const data = c.req.valid("json");
+    const item = await orderManager.addOrderItem.add(orderId, data.productId, data.quantity.toString());
+    return c.json(item, 201);
+  },
+);
+
+app.patch(
+  "/:id/items/:itemId",
+  authMiddleware,
+  requirePermission("orders:update"),
+  zValidator("json", updateOrderItemSchema),
+  async (c) => {
+    const orderId = c.req.param("id");
+    const itemId = c.req.param("itemId");
+    const data = c.req.valid("json");
+    const item = await orderManager.updateOrderItem.update(orderId, itemId, data.quantity.toString());
+    return c.json(item);
+  },
+);
+
+app.delete(
+  "/:id/items/:itemId",
+  authMiddleware,
+  requirePermission("orders:update"),
+  async (c) => {
+    const orderId = c.req.param("id");
+    const itemId = c.req.param("itemId");
+    await orderManager.deleteOrderItem.delete(orderId, itemId);
+    return c.json({ message: "Item de orden eliminado exitosamente" });
+  },
+);
 
 export default app;

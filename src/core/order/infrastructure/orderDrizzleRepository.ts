@@ -2,6 +2,7 @@ import type { Database } from "@database/connection";
 import type { IOrderRepository } from "@core/order/domain/repositories/IOrderRepository";
 import { eq, desc, count, and } from "drizzle-orm";
 import { orders, orderItems, products, clients } from "@database/schemas";
+import type { OrderItem } from "@core/order/domain/entity/order";
 import type {
   CreateOrderDTO,
   UpdateOrderDTO,
@@ -38,7 +39,10 @@ export class OrderDrizzleRepository implements IOrderRepository {
   };
 
   findByIdWithItems = async (id: string): Promise<OrderDetails | null> => {
-    const whereCondition = extractFilters([{ field: 'id', operator: 'eq', value: id }], this.columnMap);
+    const whereCondition = extractFilters(
+      [{ field: "id", operator: "eq", value: id }],
+      this.columnMap,
+    );
     const order = await this.db.query.orders.findFirst({
       with: {
         items: {
@@ -200,5 +204,74 @@ export class OrderDrizzleRepository implements IOrderRepository {
       .from(orders)
       .where(whereCondition);
     return totalCount[0]?.count || 0;
+  };
+
+  // Methods for managing order items
+  updateOrderItem = async (
+    itemId: string,
+    quantity: string,
+  ): Promise<OrderItem | null> => {
+    // Fetch the item to get its current pricePerUnit
+    const item = await this.db
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.id, itemId))
+      .limit(1);
+
+    if (!item[0]) return null;
+
+    // Calculate new subtotal
+    const pricePerUnit = item[0].pricePerUnit;
+    const subtotal = (Number(pricePerUnit) * Number(quantity)).toString();
+
+    const result = await this.db
+      .update(orderItems)
+      .set({
+        quantity,
+        subtotal,
+      })
+      .where(eq(orderItems.id, itemId))
+      .returning();
+
+    return result[0] || null;
+  };
+
+  deleteOrderItem = async (itemId: string): Promise<boolean> => {
+    const result = await this.db
+      .delete(orderItems)
+      .where(eq(orderItems.id, itemId))
+      .returning();
+    return result.length > 0;
+  };
+
+  addOrderItem = async (
+    orderId: string,
+    productId: string,
+    quantity: string,
+  ): Promise<OrderItem | null> => {
+    // Fetch product price
+    const product = await this.db
+      .select({ pricePerUnit: products.pricePerUnit })
+      .from(products)
+      .where(eq(products.id, productId))
+      .limit(1);
+
+    if (!product[0]) return null;
+
+    const pricePerUnit = product[0].pricePerUnit;
+    const subtotal = (Number(pricePerUnit) * Number(quantity)).toString();
+
+    const result = await this.db
+      .insert(orderItems)
+      .values({
+        orderId,
+        productId,
+        quantity,
+        pricePerUnit: pricePerUnit.toString(),
+        subtotal,
+      })
+      .returning();
+
+    return result[0] || null;
   };
 }

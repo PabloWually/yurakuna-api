@@ -1,5 +1,5 @@
 import { purchaseManager } from '@api/core/libs/purchase';
-import { createPurchaseSchema, updatePurchaseSchema } from '@api/core/types/purchase';
+import { createPurchaseSchema, updatePurchaseSchema, updatePurchaseItemSchema, createPurchaseItemSchema } from '@api/core/types/purchase';
 import { Criteria } from '@api/core/types/shared';
 import { authMiddleware, requirePermission } from '@api/middleware/auth';
 import { zValidator } from '@hono/zod-validator';
@@ -63,6 +63,56 @@ app.delete(
     const id = c.req.param('id');
     await purchaseManager.deletePurchase.delete(id);
     return c.json({ message: 'Compra eliminada exitosamente' });
+  },
+);
+
+// Item management endpoints
+app.post(
+  '/:id/items',
+  authMiddleware,
+  requirePermission('purchases:update'),
+  zValidator('json', createPurchaseItemSchema),
+  async (c) => {
+    const purchaseId = c.req.param('id');
+    const data = c.req.valid('json');
+    const item = await purchaseManager.addPurchaseItem.add(
+      purchaseId,
+      data.productId,
+      data.quantity.toString(),
+      data.pricePerUnit.toString(),
+    );
+    return c.json(item, 201);
+  },
+);
+
+app.patch(
+  '/:id/items/:itemId',
+  authMiddleware,
+  requirePermission('purchases:update'),
+  zValidator('json', updatePurchaseItemSchema),
+  async (c) => {
+    const purchaseId = c.req.param('id');
+    const itemId = c.req.param('itemId');
+    const data = c.req.valid('json');
+    const item = await purchaseManager.updatePurchaseItem.update(
+      purchaseId,
+      itemId,
+      data.quantity.toString(),
+      data.pricePerUnit.toString(),
+    );
+    return c.json(item);
+  },
+);
+
+app.delete(
+  '/:id/items/:itemId',
+  authMiddleware,
+  requirePermission('purchases:update'),
+  async (c) => {
+    const purchaseId = c.req.param('id');
+    const itemId = c.req.param('itemId');
+    await purchaseManager.deletePurchaseItem.delete(purchaseId, itemId);
+    return c.json({ message: 'Item de compra eliminado exitosamente' });
   },
 );
 
