@@ -74,6 +74,7 @@ export class StockDrizzleRepository implements IStockRepository {
       where: whereCondition,
       limit: criteria.limit,
       offset: criteria.offset,
+      orderBy: desc(stockMovements.createdAt),
     });
   };
 
@@ -93,6 +94,7 @@ export class StockDrizzleRepository implements IStockRepository {
       where: whereCondition,
       limit: criteria.limit,
       offset: criteria.offset,
+      orderBy: desc(shrinkage.createdAt),
     });
   };
 

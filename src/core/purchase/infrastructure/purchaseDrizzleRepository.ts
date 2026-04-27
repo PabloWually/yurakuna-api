@@ -1,11 +1,10 @@
 import type { Database } from "@database/connection";
 import type { IPurchaseRepository } from "@core/purchase/domain/repositories/IPurchaseRepository";
-import { eq, count, and } from "drizzle-orm";
+import { eq, count, and, desc } from "drizzle-orm";
 import {
   purchases,
   purchaseItems,
-  products,
-  providers,
+  purchaseStatusEnum,
 } from "@database/schemas";
 import type {
   CreatePurchaseDTO,
@@ -127,8 +126,9 @@ export class PurchaseDrizzleRepository implements IPurchaseRepository {
 
   delete = async (id: string): Promise<boolean> => {
     const result = await this.db
-      .delete(purchases)
-      .where(eq(purchases.id, id))
+      .update(purchases)
+      .set({ isActive: false })
+      .where(and(eq(purchases.id, id), eq(purchases.status, purchaseStatusEnum.enumValues[0])))
       .returning();
     return result.length > 0;
   };
@@ -147,6 +147,7 @@ export class PurchaseDrizzleRepository implements IPurchaseRepository {
       where: whereCondition,
       limit: criteria.limit,
       offset: criteria.offset,
+      orderBy: desc(purchases.createdAt),
     });
     return response as PurchaseDetails[];
   };

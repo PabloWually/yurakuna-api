@@ -28,7 +28,10 @@ export const extractFilters = (
   filters: Filter[] | undefined,
   columnMap: Record<string, AnyColumn>,
 ): SQL | undefined => {
-  if (!filters || filters.length === 0) return undefined;
+  if (!filters || filters.length === 0)
+    filters = [{ field: 'isActive', operator: 'eq', value: true }];
+  else
+    filters.push({ field: 'isActive', operator: 'eq', value: true });
 
   const conditions = filters.reduce<SQL[]>((acc, filter) => {
     const column = columnMap[filter.field];

@@ -1,6 +1,6 @@
 import type { Database } from '@database/connection';
 import type { IProviderRepository } from '@core/provider/domain/repositories/IProviderRepository';
-import { eq, count } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
 import { providers } from '@database/schemas';
 import type { CreateProviderDTO, UpdateProviderDTO } from '@core/provider/domain/DTOs/providerDTO';
 import type { Provider } from '@core/provider/domain/entity/provider';
@@ -24,7 +24,7 @@ export class ProviderDrizzleRepository implements IProviderRepository {
     const result = await this.db
       .select()
       .from(providers)
-      .where(eq(providers.id, id))
+      .where(and(eq(providers.id, id), eq(providers.isActive, true)))
       .limit(1);
     return result[0] || null;
   };
@@ -33,7 +33,7 @@ export class ProviderDrizzleRepository implements IProviderRepository {
     const result = await this.db
       .select()
       .from(providers)
-      .where(eq(providers.name, name))
+      .where(and(eq(providers.name, name), eq(providers.isActive, true)))
       .limit(1);
     return result[0] || null;
   };
@@ -76,7 +76,8 @@ export class ProviderDrizzleRepository implements IProviderRepository {
 
   delete = async (id: string): Promise<boolean> => {
     const result = await this.db
-      .delete(providers)
+      .update(providers)
+      .set({ isActive: false })
       .where(eq(providers.id, id))
       .returning();
     return result.length > 0;

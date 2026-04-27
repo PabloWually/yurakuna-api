@@ -1,7 +1,7 @@
 import type { Database } from "@database/connection";
 import type { IDeliveryRepository } from "@core/delivery/domain/repositories/IDeliveryRepository";
-import { eq, desc, count } from "drizzle-orm";
-import { deliveries, deliveryItems } from "@database/schemas";
+import { eq, desc, count, and } from "drizzle-orm";
+import { deliveries, deliveryItems, deliveryStatusEnum } from "@database/schemas";
 import type {
   CreateDeliveryDTO,
   UpdateDeliveryDTO,
@@ -34,14 +34,14 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
     const result = await this.db
       .select()
       .from(deliveries)
-      .where(eq(deliveries.id, id))
+      .where(and(eq(deliveries.id, id), eq(deliveries.isActive, true)))
       .limit(1);
     return result[0] || null;
   };
 
   findByIdWithItems = async (id: string): Promise<DeliveryDetails | null> => {
     const result = await this.db.query.deliveries.findFirst({
-      where: eq(deliveries.id, id),
+      where: and(eq(deliveries.id, id), eq(deliveries.isActive, true)),
       with: {
         items: {
           with: {
@@ -61,7 +61,7 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
     const result = await this.db
       .select()
       .from(deliveries)
-      .where(eq(deliveries.orderId, orderId))
+      .where(and(eq(deliveries.orderId, orderId), eq(deliveries.isActive, true)))
       .limit(1);
     return result[0] || null;
   };
@@ -118,8 +118,9 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
 
   delete = async (id: string): Promise<boolean> => {
     const result = await this.db
-      .delete(deliveries)
-      .where(eq(deliveries.id, id))
+      .update(deliveries)
+      .set({ isActive: false })
+      .where(and(eq(deliveries.id, id), eq(deliveries.status, deliveryStatusEnum.enumValues[0])))
       .returning();
     return result.length > 0;
   };
@@ -131,6 +132,7 @@ export class DeliveryDrizzleRepository implements IDeliveryRepository {
       where: whereCondition,
       limit: criteria.limit,
       offset: criteria.offset,
+      orderBy: desc(deliveries.createdAt),
     });
   };
 

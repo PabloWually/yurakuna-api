@@ -1,8 +1,7 @@
 import type { Database } from "@database/connection";
 import type { IOrderRepository } from "@core/order/domain/repositories/IOrderRepository";
 import { eq, desc, count, and } from "drizzle-orm";
-import { orders, orderItems, products, clients } from "@database/schemas";
-import type { OrderItem } from "@core/order/domain/entity/order";
+import { orders, orderItems, products, clients, orderStatusEnum } from "@database/schemas";
 import type {
   CreateOrderDTO,
   UpdateOrderDTO,
@@ -33,7 +32,7 @@ export class OrderDrizzleRepository implements IOrderRepository {
     const result = await this.db
       .select()
       .from(orders)
-      .where(eq(orders.id, id))
+      .where(and(eq(orders.id, id), eq(orders.isActive, true)))
       .limit(1);
     return result[0] || null;
   };
@@ -139,8 +138,9 @@ export class OrderDrizzleRepository implements IOrderRepository {
 
   delete = async (id: string): Promise<boolean> => {
     const result = await this.db
-      .delete(orders)
-      .where(eq(orders.id, id))
+      .update(orders)
+      .set({ isActive: false })
+      .where(and(eq(orders.id, id), eq(orders.status, orderStatusEnum.enumValues[0])))
       .returning();
     return result.length > 0;
   };
@@ -159,6 +159,7 @@ export class OrderDrizzleRepository implements IOrderRepository {
       where: whereCondition,
       limit: criteria.limit,
       offset: criteria.offset,
+      orderBy: desc(orders.createdAt),
     });
     return response;
   };

@@ -1,6 +1,6 @@
 import type { Database } from "@database/connection";
 import type { IProductRepository } from "@core/product/domain/repositories/IProductRepository";
-import { eq, desc, count, sql } from "drizzle-orm";
+import { eq, and, desc, count, sql } from "drizzle-orm";
 import { products } from "@database/schemas";
 import type {
   CreateProductDTO,
@@ -28,7 +28,7 @@ export class ProductDrizzleRepository implements IProductRepository {
     const result = await this.db
       .select()
       .from(products)
-      .where(eq(products.id, id))
+      .where(and(eq(products.id, id), eq(products.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -38,7 +38,7 @@ export class ProductDrizzleRepository implements IProductRepository {
     const result = await this.db
       .select()
       .from(products)
-      .where(eq(products.name, name))
+      .where(and(eq(products.name, name), eq(products.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -89,7 +89,8 @@ export class ProductDrizzleRepository implements IProductRepository {
 
   delete = async (id: string): Promise<boolean> => {
     const result = await this.db
-      .delete(products)
+      .update(products)
+      .set({ isActive: false })
       .where(eq(products.id, id))
       .returning();
 

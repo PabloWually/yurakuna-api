@@ -2,7 +2,7 @@ import type { IClientRepository } from "@core/client/domain/repositories/IClient
 import type { Client } from "@core/client/domain/entity/client";
 import { clients } from "@database/schemas";
 import type { Database } from "@database/connection";
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq, and } from "drizzle-orm";
 import type {
   CreateClientDTO,
   UpdateClientDTO,
@@ -29,7 +29,7 @@ export class ClientDrizzleRepository implements IClientRepository {
     const result = await this.db
       .select()
       .from(clients)
-      .where(eq(clients.id, id))
+      .where(and(eq(clients.id, id), eq(clients.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -39,7 +39,7 @@ export class ClientDrizzleRepository implements IClientRepository {
     const result = await this.db
       .select()
       .from(clients)
-      .where(eq(clients.email, email))
+      .where(and(eq(clients.email, email), eq(clients.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -49,7 +49,7 @@ export class ClientDrizzleRepository implements IClientRepository {
     const result = await this.db
       .select()
       .from(clients)
-      .where(eq(clients.userId, userId))
+      .where(and(eq(clients.userId, userId), eq(clients.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -89,7 +89,8 @@ export class ClientDrizzleRepository implements IClientRepository {
 
   delete = async (id: string): Promise<boolean> => {
     const result = await this.db
-      .delete(clients)
+      .update(clients)
+      .set({ isActive: false })
       .where(eq(clients.id, id))
       .returning();
 
