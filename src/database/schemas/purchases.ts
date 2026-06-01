@@ -22,7 +22,7 @@ export const purchaseItems = pgTable('purchase_items', {
   purchaseId: uuid('purchase_id').notNull().references(() => purchases.id, { onDelete: 'cascade' }),
   productId: uuid('product_id').notNull().references(() => products.id, { onDelete: 'restrict' }),
   quantity: decimal('quantity', { precision: 10, scale: 2 }).notNull(),
-  pricePerUnit: decimal('price_per_unit', { precision: 10, scale: 2 }).notNull(),
+  pricePerUnit: decimal('price_per_unit', { precision: 10, scale: 4 }).notNull(),
   subtotal: decimal('subtotal', { precision: 10, scale: 2 }).notNull(),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),

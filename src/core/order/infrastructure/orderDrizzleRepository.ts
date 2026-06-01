@@ -8,6 +8,7 @@ import type {
 } from "@core/order/domain/DTOs/orderDTO";
 import type {
   Order,
+  OrderDetailCount,
   OrderDetails,
   OrderItem,
   OrderWithItems,
@@ -145,7 +146,7 @@ export class OrderDrizzleRepository implements IOrderRepository {
     return result.length > 0;
   };
 
-  search = async (criteria: Criteria): Promise<OrderDetails[]> => {
+  search = async (criteria: Criteria): Promise<OrderDetailCount[]> => {
     const whereCondition = extractFilters(criteria.filters, this.columnMap);
     const response = await this.db.query.orders.findMany({
       with: {

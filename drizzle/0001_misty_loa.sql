@@ -1,0 +1,1 @@
+ALTER TABLE "purchase_items" ALTER COLUMN "price_per_unit" SET DATA TYPE numeric(10, 4);

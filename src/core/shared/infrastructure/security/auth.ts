@@ -1,4 +1,5 @@
 import type { Role } from '@shared/types';
+import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -80,7 +81,7 @@ export async function verifyRefreshToken(token: string): Promise<RefreshTokenPay
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return await Bun.password.hash(password);
+  return await bcrypt.hash(password, 10);
 }
 
 function normalizePasswordHash(hash: string): string {
@@ -97,7 +98,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   const normalizedHash = normalizePasswordHash(hash);
 
   try {
-    return await Bun.password.verify(password, normalizedHash);
+    return await bcrypt.compare(password, normalizedHash);
   } catch (error) {
     // If the hash algorithm is unknown/unsupported, treat it as invalid credentials
     // instead of throwing and turning login into a 500 response.

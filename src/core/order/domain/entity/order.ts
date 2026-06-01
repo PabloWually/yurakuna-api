@@ -28,6 +28,16 @@ export interface OrderItem {
   createdAt: Date;
 }
 
+export interface OrderItemId {
+  productId: string;
+}
+
 export interface OrderWithItems extends Order {
   items: OrderItem[];
+}
+
+export interface OrderDetailCount extends Order {
+  items?: OrderItemId[];
+  itemsCount?: number;
+  client: Client;
 }

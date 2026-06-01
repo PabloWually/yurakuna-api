@@ -15,10 +15,10 @@ import purchases from "./src/routes/purchases";
 const app = new Hono();
 
 app.use('*', logger());
-app.use('*', cors());
+app.use('*', cors({ origin: 'https://yurakuna-front.pablo-guallichico.workers.dev', credentials: true }));
 app.use('*', errorHandler);
 
-app.get('/', (c) => {
+app.get('/api', (c) => {
   return c.json({
     message: 'Yurakuna API - Sistema de gestión de productos (hortalizas)',
     version: '1.0.0',
@@ -44,9 +44,18 @@ app.notFound((c) => {
   return c.json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada' } }, 404);
 });
 
+// Respond to preflight requests for any route
+app.options('*', (c) => {
+  return c.text('option');
+});
+
 const port = process.env.PORT || 3000;
 
-console.log(`Server running on http://localhost:${port}`);
+if (import.meta.main) {
+  console.log(`Server running on http://localhost:${port}`);
+}
+
+export { app };
 
 export default {
   port,
