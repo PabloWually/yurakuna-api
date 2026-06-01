@@ -15,7 +15,12 @@ import purchases from "./src/routes/purchases";
 const app = new Hono();
 
 app.use('*', logger());
-app.use('*', cors({ origin: 'https://yurakuna-front.pablo-guallichico.workers.dev', credentials: true }));
+app.use('/api/*',
+  cors({ 
+    origin: 'https://yurakuna-front.pablo-guallichico.workers.dev',
+    credentials: true 
+  })
+);
 app.use('*', errorHandler);
 
 app.get('/api', (c) => {
